@@ -132,6 +132,11 @@ func (c *Client) Write(numBytes int) error {
 	gopacket.SerializeLayers(buf, opts,
 		n...,
 	)
+
+	_, err := c.conn.Write(buf.Bytes())
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
