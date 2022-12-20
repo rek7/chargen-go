@@ -6,6 +6,10 @@ Client also has ability to change dst ip, for chargen [DDoS amplication attacks]
 A Cli tool [main.go](./main.go), provides the ability to stand up a server and use a client.
 
 
+## Installation
+`go get -u github.com/rek7/chargen-go`
+
+
 ## Server Example
 
 ```go

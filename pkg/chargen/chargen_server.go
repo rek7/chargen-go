@@ -26,26 +26,34 @@ func (s *Server) Serve() error {
 		if err != nil {
 			return err
 		}
-		if s.ln.Addr().Network() == "tcp" {
-			go s.handleConnectionTCP(conn)
-		} else if s.ln.Addr().Network() == "udp" {
 
-		}
+		go s.handleConnectionTCP(conn, s.ln.Addr().Network())
 	}
 }
 
-func (s *Server) handleConnectionTCP(conn net.Conn) error {
+func (s *Server) handleConnectionTCP(conn net.Conn, proto string) error {
 	defer conn.Close()
-	bw := bufio.NewWriter(conn)
-	for {
-		// Generate a stream of characters starting with ASCII character 32 (' ')
-		// and ending with ASCII character 126 ('~').
-		for i := 32; i <= 126; i++ {
-			if _, err := fmt.Fprintf(bw, "%c", i); err != nil {
-				return err
+	if proto == "tcp" {
+		bw := bufio.NewWriter(conn)
+		for {
+			// Generate a stream of characters starting with ASCII character 32 (' ')
+			// and ending with ASCII character 126 ('~').
+			for i := 32; i <= 126; i++ {
+				if _, err := fmt.Fprintf(bw, "%c", i); err != nil {
+					return err
+				}
 			}
+			bw.Flush()
 		}
-		bw.Flush()
+	} else {
+		buf := make([]byte, 1)
+		if _, err := conn.Read(buf); err != nil {
+			return err
+		}
+		// gen random data and send it over
+		if _, err := conn.Write(genData(0)); err != nil {
+			return err
+		}
 	}
 	return nil
 }

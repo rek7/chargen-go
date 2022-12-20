@@ -2,7 +2,6 @@ package chargen
 
 import (
 	"bufio"
-	"bytes"
 	"fmt"
 	"math/rand"
 	"net"
@@ -120,17 +119,6 @@ func (c *Client) UpdateSrcIP(newSrcInfo net.IP) error {
 	return nil
 }
 
-func (c *Client) genData(num int) []byte {
-	if num == 0 {
-		num = rand.Intn(512-1) + 1
-	}
-	b := new(bytes.Buffer)
-	for i := 0; num >= i; i++ {
-		b.Write([]byte(fmt.Sprintf("%c", rand.Intn(126-33)+3)))
-	}
-	return b.Bytes()
-}
-
 func (c *Client) order() {
 	sort.Slice(c.layers[:], func(i, j int) bool {
 		return int64(c.layers[i].LayerType()) < int64(c.layers[j].LayerType())
@@ -139,18 +127,16 @@ func (c *Client) order() {
 
 func (c *Client) Write(numBytes int) error {
 	c.order()
-	payload := c.genData(numBytes)
+	payload := genData(numBytes)
 	buf := gopacket.NewSerializeBuffer()
 
 	opts := gopacket.SerializeOptions{
 		FixLengths:       true,
 		ComputeChecksums: true,
 	}
-	n := append(make([]gopacket.SerializableLayer, 0), c.layers...)
-	fmt.Println(n, c.layers)
-	//n = append(n, c.layers...)
+	n := make([]gopacket.SerializableLayer, 0)
+	n = append(n, c.layers...)
 	n = append(n, gopacket.Payload(payload))
-	fmt.Println(n, c.layers)
 	gopacket.SerializeLayers(buf, opts,
 		n...,
 	)
