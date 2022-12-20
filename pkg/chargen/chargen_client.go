@@ -138,14 +138,11 @@ func (c *Client) Write(numBytes int) error {
 		FixLengths:       true,
 		ComputeChecksums: true,
 	}
-	// n := make([]gopacket.SerializableLayer, 0)
-	// n = append(n, gopacket.Payload(payload))
-	// n = append(n, c.layers...)
+	n := make([]gopacket.SerializableLayer, 0)
+	n = append(n, c.layers...)
+	n = append(n, gopacket.Payload(payload))
 	gopacket.SerializeLayers(buf, opts,
-		&layers.Ethernet{}, &layers.UDP{
-			SrcPort: layers.UDPPort(rand.Intn(65535)),
-			DstPort: layers.UDPPort(c.port),
-		}, gopacket.Payload(payload),
+		n...,
 	)
 
 	_, err := c.conn.Write(buf.Bytes())
