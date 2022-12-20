@@ -61,21 +61,21 @@ func main() {
 package main
 
 import (
-	"net"
+    "net"
 
-	"github.com/rek7/chargen-go/pkg/chargen"
+    "github.com/rek7/chargen-go/pkg/chargen"
 )
 
 func main() {
-	ln, err := net.ListenUDP("udp", &net.UDPAddr{
+    ln, err := net.ListenUDP("udp", &net.UDPAddr{
         Port: 19,
         IP:   net.ParseIP("0.0.0.0"),
-	})
-	if err != nil {
-		// handle error
-	}
-	server := chargen.NewServer(ln)
-	server.ServeUDP()
+    })
+    if err != nil {
+        // handle error
+    }
+    server := chargen.NewServer(ln)
+    server.ServeUDP()
 }
 ```
 
@@ -84,18 +84,18 @@ func main() {
 package main
 
 import (
-	"fmt"
+    "fmt"
     "net"
 
-	"github.com/rek7/chargen-go/pkg/chargen"
+    "github.com/rek7/chargen-go/pkg/chargen"
 )
 
 func main() {
-	client, err := chargen.NewClient("tcp", "127.0.0.1:19")
-	if err != nil {
-		// handle error
-	}
-	defer client.Close()
+    client, err := chargen.NewClient("tcp", "127.0.0.1:19")
+    if err != nil {
+        // handle error
+    }
+    defer client.Close()
 
     // Used to spoof Source IP for amplification attacks. Leave a blank IP if you want it to randomly
     // generate a public ip.
@@ -104,12 +104,12 @@ func main() {
     // Specify 0 to generate a packet random within the size 1-512 bytes.
     client.Write(0)
 
-	for {
-		line, err := client.Read()
-		if err != nil {
-			// handle error
-		}
-		fmt.Println(string(line))
-	}
+    for {
+        line, err := client.Read()
+        if err != nil {
+            // handle error
+        }
+        fmt.Println(string(line))
+    }
 }
 ```
