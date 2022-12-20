@@ -11,7 +11,7 @@ func genData(num int) []byte {
 		num = rand.Intn(512-1) + 1
 	}
 	b := new(bytes.Buffer)
-	for i := 0; num >= i; i++ {
+	for i := 0; num > i; i++ {
 		b.Write([]byte(fmt.Sprintf("%c", rand.Intn(126-33)+3)))
 	}
 	return b.Bytes()

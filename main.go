@@ -11,13 +11,13 @@ import (
 
 var rootCmd = &cobra.Command{
 	Use:   "chargen",
-	Short: "chargen - Wrapper for chargen-go library to stand up a server or run a client.",
+	Short: "chargen - Wrapper for github.com/rek7/chargen-go library to stand up a server or run a client.",
 }
 
 var serverCmd = &cobra.Command{
 	Use:     "server",
 	Aliases: []string{"srv"},
-	Short:   "Reverses a string",
+	Short:   "Chargen TCP/UDP client",
 	Run: func(cmd *cobra.Command, args []string) {
 		host, err := cmd.Flags().GetString("host")
 		if err != nil {
@@ -27,21 +27,36 @@ var serverCmd = &cobra.Command{
 		if err != nil {
 			panic("issue parsing proto " + err.Error())
 		}
-		ln, err := net.Listen(proto, host)
-		if err != nil {
-			panic("issue listening " + err.Error())
+
+		server := chargen.NewServer()
+		if proto == "tcp" {
+			ln, err := net.Listen(proto, host)
+			if err != nil {
+				panic("issue listening " + err.Error())
+			}
+			if err := server.ServeTCP(ln); err != nil {
+				panic("issue serving " + err.Error())
+			}
+		} else {
+			ln, err := net.ListenUDP(proto, &net.UDPAddr{
+				Port: 1234,
+				IP:   net.ParseIP("127.0.0.1"),
+			})
+			if err != nil {
+				panic("issue listening " + err.Error())
+			}
+			if err := server.ServeUDP(ln); err != nil {
+				panic("issue serving " + err.Error())
+			}
 		}
-		server := chargen.NewServer(ln)
-		if err := server.Serve(); err != nil {
-			panic("issue serving " + err.Error())
-		}
+
 	},
 }
 
 var clientCmd = &cobra.Command{
 	Use:     "client",
 	Aliases: []string{"cli"},
-	Short:   "Reverses a string",
+	Short:   "Chargen UDP/TCP client",
 	Run: func(cmd *cobra.Command, args []string) {
 		host, err := cmd.Flags().GetString("host")
 		if err != nil {
@@ -60,7 +75,7 @@ var clientCmd = &cobra.Command{
 			panic("issue parsing mode " + err.Error())
 		}
 
-		cli, err := chargen.NewClient(host, proto)
+		cli, err := chargen.NewClient(proto, host)
 		if err != nil {
 			panic("issue creating client " + err.Error())
 		}
@@ -76,7 +91,7 @@ var clientCmd = &cobra.Command{
 				if err != nil {
 					panic("issue reading " + err.Error())
 				}
-				fmt.Println(line)
+				fmt.Println(string(line))
 			}
 		} else {
 			cli.Write(0)

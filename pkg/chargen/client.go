@@ -22,7 +22,7 @@ type Client struct {
 }
 
 // NewClient creates a new chargen client.
-func NewClient(target, protocol string) (*Client, error) {
+func NewClient(protocol, target string) (*Client, error) {
 	// 0 -> ip;1->port
 	ip, port, isFound := strings.Cut(target, ":")
 	if !isFound {
@@ -62,6 +62,8 @@ func NewClient(target, protocol string) (*Client, error) {
 			DstPort: layers.TCPPort(portInt),
 			Seq:     0,
 			Window:  65535,
+			SYN:     true,
+			ACK:     true,
 		})
 	} else if protocol == "udp" {
 		l = append(l, &layers.UDP{
@@ -149,13 +151,13 @@ func (c *Client) Write(numBytes int) error {
 }
 
 // Read reads characters from the chargen server.
-func (c *Client) Read() (string, error) {
+func (c *Client) Read() ([]byte, error) {
 	br := bufio.NewReader(c.conn)
 	line, _, err := br.ReadLine()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return string(line), nil
+	return line, nil
 }
 
 // Close closes the connection to the chargen server.
