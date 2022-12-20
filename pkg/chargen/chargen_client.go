@@ -56,6 +56,12 @@ func NewClient(target, protocol string) (*Client, error) {
 	l := make([]gopacket.SerializableLayer, 0)
 	l = append(l, &layers.Ethernet{})
 
+	if protocol == "tcp" {
+		l = append(l, &layers.TCP{})
+	} else if protocol == "udp" {
+		l = append(l, &layers.UDP{})
+	}
+
 	return &Client{
 		conn:   conn,
 		port:   portInt,
