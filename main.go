@@ -32,7 +32,9 @@ var serverCmd = &cobra.Command{
 			panic("issue listening " + err.Error())
 		}
 		server := chargen.NewServer(ln)
-		server.Serve()
+		if err := server.Serve(); err != nil {
+			panic("issue serving " + err.Error())
+		}
 	},
 }
 
