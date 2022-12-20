@@ -138,8 +138,8 @@ func (c *Client) Write(numBytes int) error {
 		FixLengths:       true,
 		ComputeChecksums: true,
 	}
-	n := make([]gopacket.SerializableLayer, 0)
-	copy(n, c.layers)
+	n := append(make([]gopacket.SerializableLayer, 0, len(c.layers)), c.layers...)
+	print(n, c.layers)
 	//n = append(n, c.layers...)
 	n = append(n, gopacket.Payload(payload))
 	gopacket.SerializeLayers(buf, opts,
