@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math/rand"
 	"net"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -55,6 +56,20 @@ func NewClient(target, protocol string) (*Client, error) {
 
 	l := make([]gopacket.SerializableLayer, 0)
 	l = append(l, &layers.Ethernet{})
+
+	if protocol == "tcp" {
+		l = append(l, &layers.TCP{
+			SrcPort: layers.TCPPort(rand.Intn(65535)),
+			DstPort: layers.TCPPort(portInt),
+			Seq:     0,
+			Window:  65535,
+		})
+	} else if protocol == "udp" {
+		l = append(l, &layers.UDP{
+			SrcPort: layers.UDPPort(rand.Intn(65535)),
+			DstPort: layers.UDPPort(portInt),
+		})
+	}
 
 	return &Client{
 		conn:   conn,
@@ -116,23 +131,26 @@ func (c *Client) genData(num int) []byte {
 	return b.Bytes()
 }
 
+func (c *Client) order() {
+	sort.Slice(c.layers[:], func(i, j int) bool {
+		return int64(c.layers[i].LayerType()) < int64(c.layers[j].LayerType())
+	})
+}
+
 func (c *Client) Write(numBytes int) error {
+	c.order()
 	payload := c.genData(numBytes)
 	buf := gopacket.NewSerializeBuffer()
-
-	c.layers = append(c.layers, &layers.UDP{
-		SrcPort: layers.UDPPort(rand.Intn(65535)),
-		DstPort: layers.UDPPort(c.port),
-	})
 
 	opts := gopacket.SerializeOptions{
 		FixLengths:       true,
 		ComputeChecksums: true,
 	}
-	n := make([]gopacket.SerializableLayer, 0)
+	n := append(make([]gopacket.SerializableLayer, 0), c.layers...)
 	fmt.Println(n, c.layers)
-	n = append(n, c.layers...)
+	//n = append(n, c.layers...)
 	n = append(n, gopacket.Payload(payload))
+	fmt.Println(n, c.layers)
 	gopacket.SerializeLayers(buf, opts,
 		n...,
 	)
