@@ -1,5 +1,5 @@
 # Chargen-Go
-Chargen protocol implementation as per [RFC 864](https://www.rfc-editor.org/rfc/rfc864), [RFC 865](https://www.rfc-editor.org/rfc/rfc865), and [RFC 866](https://www.rfc-editor.org/rfc/rfc866). Ipv6 friendly.
+Chargen protocol implementation as per [RFC 864](https://www.rfc-editor.org/rfc/rfc864) and [RFC 865](https://www.rfc-editor.org/rfc/rfc865). Ipv6 friendly.
 
 Client also has ability to spoof source IPs for chargen [DDoS amplication attacks](https://www.link11.com/en/blog/threat-landscape/chargen-flood-attacks-explained/).
 
