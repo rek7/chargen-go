@@ -52,8 +52,8 @@ func main() {
 	if err != nil {
 		// handle error
 	}
-	server := chargen.NewServer(ln)
-	server.ServeTCP()
+	server := chargen.NewServer()
+	server.ServeTCP(ln)
 }
 ```
 ### UDP
@@ -74,8 +74,8 @@ func main() {
     if err != nil {
         // handle error
     }
-    server := chargen.NewServer(ln)
-    server.ServeUDP()
+    server := chargen.NewServer()
+    server.ServeUDP(ln)
 }
 ```
 
