@@ -139,7 +139,8 @@ func (c *Client) Write(numBytes int) error {
 		ComputeChecksums: true,
 	}
 	n := make([]gopacket.SerializableLayer, 0)
-	n = append(n, c.layers...)
+	copy(n, c.layers)
+	//n = append(n, c.layers...)
 	n = append(n, gopacket.Payload(payload))
 	gopacket.SerializeLayers(buf, opts,
 		n...,
