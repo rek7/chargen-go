@@ -57,9 +57,17 @@ func NewClient(target, protocol string) (*Client, error) {
 	l = append(l, &layers.Ethernet{})
 
 	if protocol == "tcp" {
-		l = append(l, &layers.TCP{})
+		l = append(l, &layers.TCP{
+			SrcPort: layers.TCPPort(rand.Intn(65535)),
+			DstPort: layers.TCPPort(portInt),
+			Seq:     0,
+			Window:  65535,
+		})
 	} else if protocol == "udp" {
-		l = append(l, &layers.UDP{})
+		l = append(l, &layers.UDP{
+			SrcPort: layers.UDPPort(rand.Intn(65535)),
+			DstPort: layers.UDPPort(portInt),
+		})
 	}
 
 	return &Client{
