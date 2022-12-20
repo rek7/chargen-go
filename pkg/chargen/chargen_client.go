@@ -124,10 +124,8 @@ func (c *Client) genData(num int) []byte {
 		num = rand.Intn(512-1) + 1
 	}
 	b := new(bytes.Buffer)
-	for i := 0; num < i; i++ {
+	for i := 0; num >= i; i++ {
 		b.Write([]byte(fmt.Sprintf("%c", rand.Intn(126-33)+3)))
-	}
-	for i := 32; i <= 126; i++ {
 	}
 	return b.Bytes()
 }
