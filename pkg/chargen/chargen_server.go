@@ -18,7 +18,7 @@ func NewServer(ln net.Listener) *Server {
 
 // Serve serves chargen requests.
 func (s *Server) Serve() error {
-	if s.ln.Addr().Network() != "tcp" || s.ln.Addr().Network() != "udp" {
+	if s.ln.Addr().Network() != "tcp" && s.ln.Addr().Network() != "udp" {
 		return fmt.Errorf("server protocol must be tcp or udp")
 	}
 	for {
