@@ -2,8 +2,11 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net"
 	"os"
+	"strconv"
+	"strings"
 
 	"github.com/rek7/chargen-go/pkg/chargen"
 	"github.com/spf13/cobra"
@@ -21,32 +24,47 @@ var serverCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		host, err := cmd.Flags().GetString("host")
 		if err != nil {
-			panic("issue parsing host " + err.Error())
+			log.Panicf("issue parsing host " + err.Error())
 		}
 		proto, err := cmd.Flags().GetString("protocol")
 		if err != nil {
-			panic("issue parsing proto " + err.Error())
+			log.Panicf("issue parsing proto " + err.Error())
+		}
+
+		i := strings.LastIndex(host, ":")
+		if i == -1 {
+			log.Panicln("target needs to be ip:port")
+		}
+
+		ip := host[:i]
+		port, err := strconv.Atoi(host[i+1:])
+		if err != nil {
+			log.Panicf("issue converting port %v", err)
 		}
 
 		server := chargen.NewServer()
 		if proto == "tcp" {
 			ln, err := net.Listen(proto, host)
 			if err != nil {
-				panic("issue listening " + err.Error())
+				log.Panicf("issue listening " + err.Error())
 			}
+
+			log.Printf("listening on %v\n", ln.Addr())
 			if err := server.ServeTCP(ln); err != nil {
-				panic("issue serving " + err.Error())
+				log.Panicf("issue serving " + err.Error())
 			}
 		} else {
 			ln, err := net.ListenUDP(proto, &net.UDPAddr{
-				Port: 1234,
-				IP:   net.ParseIP("127.0.0.1"),
+				Port: port,
+				IP:   net.ParseIP(ip),
 			})
 			if err != nil {
-				panic("issue listening " + err.Error())
+				log.Panicf("issue listening " + err.Error())
 			}
+
+			log.Printf("listening on %v\n", ln.LocalAddr())
 			if err := server.ServeUDP(ln); err != nil {
-				panic("issue serving " + err.Error())
+				log.Panicf("issue serving " + err.Error())
 			}
 		}
 
@@ -60,36 +78,44 @@ var clientCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		host, err := cmd.Flags().GetString("host")
 		if err != nil {
-			panic("issue parsing host " + err.Error())
+			log.Panicf("issue parsing host " + err.Error())
 		}
+
 		proto, err := cmd.Flags().GetString("protocol")
 		if err != nil {
-			panic("issue parsing proto " + err.Error())
+			log.Panicf("issue parsing proto " + err.Error())
 		}
+
 		src, err := cmd.Flags().GetString("src")
 		if err != nil {
-			panic("issue parsing src " + err.Error())
+			log.Panicf("issue parsing src " + err.Error())
 		}
+
 		mode, err := cmd.Flags().GetBool("mode")
 		if err != nil {
-			panic("issue parsing mode " + err.Error())
+			log.Panicf("issue parsing mode " + err.Error())
 		}
 
 		cli, err := chargen.NewClient(proto, host)
 		if err != nil {
-			panic("issue creating client " + err.Error())
+			log.Panicf("issue creating client " + err.Error())
 		}
 
 		defer cli.Close()
 		if src != "" {
-			cli.UpdateSrcIP(net.IP(src))
+			if src == "t" {
+				src = ""
+			}
+			if err := cli.UpdateSrcIP(net.IP(src)); err != nil {
+				log.Panicf("issue uypdating ip " + err.Error())
+			}
 		}
 
 		if mode {
 			for {
 				line, err := cli.Read()
 				if err != nil {
-					panic("issue reading " + err.Error())
+					log.Panicf("issue reading " + err.Error())
 				}
 				fmt.Println(string(line))
 			}
@@ -112,6 +138,7 @@ func Execute() {
 }
 
 func main() {
+	log.SetOutput(os.Stdout)
 	clientCmd.Flags().StringP("host", "i", "127.0.0.1:19", "Host, including port, default 127.0.0.1:19")
 	clientCmd.Flags().StringP("protocol", "p", "tcp", "Protocol, default udp. Only accepts tcp/udp")
 	clientCmd.Flags().StringP("src", "s", "", "Spoof src ip, 't' for random ip if you want to specify one pass it as an arg")

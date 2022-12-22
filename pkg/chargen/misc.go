@@ -4,7 +4,13 @@ import (
 	"bytes"
 	"fmt"
 	"math/rand"
+	"time"
 )
+
+func init() {
+	// Seed randomness for packet generation
+	rand.Seed(time.Now().UnixNano())
+}
 
 func genData(num int) []byte {
 	if num == 0 {

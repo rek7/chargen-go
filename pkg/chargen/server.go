@@ -3,6 +3,7 @@ package chargen
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"net"
 )
 
@@ -21,6 +22,7 @@ func (s *Server) ServeTCP(ln net.Listener) error {
 			return err
 		}
 
+		log.Printf("got connection from %v\n", conn.RemoteAddr().String())
 		go func(conn net.Conn) error {
 			bw := bufio.NewWriter(conn)
 			for {
@@ -41,12 +43,12 @@ func (s *Server) ServeTCP(ln net.Listener) error {
 func (s *Server) ServeUDP(ln *net.UDPConn) error {
 	p := make([]byte, 2048)
 	for {
-		_, remoteaddr, err := ln.ReadFromUDP(p)
-		fmt.Printf("Read a message from %v %s \n", remoteaddr, p)
+		size, remoteaddr, err := ln.ReadFromUDP(p)
 		if err != nil {
 			fmt.Printf("Some error  %v", err)
 			continue
 		}
+		log.Printf("got packet from %v packet size %v\n", remoteaddr.AddrPort().String(), size)
 		go func(conn *net.UDPConn, addr *net.UDPAddr) error {
 			_, err := conn.WriteToUDP(genData(0), addr)
 			if err != nil {
