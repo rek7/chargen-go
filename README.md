@@ -3,17 +3,14 @@ Chargen protocol implementation as per [RFC 864](https://www.rfc-editor.org/rfc/
 
 Client also has ability to spoof source IPs for chargen [DDoS amplication attacks](https://www.link11.com/en/blog/threat-landscape/chargen-flood-attacks-explained/).
 
-A Cli tool [main.go](./main.go), provides the ability to stand up a server and use a client.
+A Cli tool [chargen-go](./main.go), provides the ability to stand up a server and use a client.
 
 
 ## Installation
 `go get -u github.com/rek7/chargen-go`
 
-Install cli tool:
-
+### Install cli tool to $GOPATH/bin
 `go install github.com/rek7/chargen-go`
-
-
 
 ## Cli Command
 ```

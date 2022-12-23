@@ -49,7 +49,7 @@ var serverCmd = &cobra.Command{
 				log.Panicf("issue listening " + err.Error())
 			}
 
-			log.Printf("listening on %v\n", ln.Addr())
+			log.Printf("listening on tcp: %v\n", ln.Addr())
 			if err := server.ServeTCP(ln); err != nil {
 				log.Panicf("issue serving " + err.Error())
 			}
@@ -62,7 +62,7 @@ var serverCmd = &cobra.Command{
 				log.Panicf("issue listening " + err.Error())
 			}
 
-			log.Printf("listening on %v\n", ln.LocalAddr())
+			log.Printf("listening on udp: %v\n", ln.LocalAddr())
 			if err := server.ServeUDP(ln); err != nil {
 				log.Panicf("issue serving " + err.Error())
 			}
