@@ -25,20 +25,23 @@ type Client struct {
 // NewClient creates a new chargen client.
 func NewClient(protocol, target string) (*Client, error) {
 	var conn net.Conn
-	// 0 -> ip;1->port
-	i := strings.LastIndex(target, ":")
-	if i == -1 {
-		return nil, fmt.Errorf("target needs to be ip:port")
-	}
-
-	ip := target[:i]
-	port, err := strconv.Atoi(target[i+1:])
-	if err != nil {
-		return nil, fmt.Errorf("issue converting port %v", err)
-	}
-
 	if protocol != "udp" && protocol != "tcp" {
 		return nil, fmt.Errorf("protocol needs to be either tcp or udp")
+	}
+
+	// 0 -> ip;1->port
+	ip, portStr, err := net.SplitHostPort(target)
+	if err != nil {
+		return nil, err
+	}
+
+	if ip == "" || portStr == "" {
+		return nil, fmt.Errorf("port or ip is empty, both need to be present")
+	}
+
+	port, err := strconv.Atoi(portStr)
+	if err != nil {
+		return nil, fmt.Errorf("issue converting port %v", err)
 	}
 
 	targetip, err := net.LookupIP(ip)
@@ -117,7 +120,12 @@ func (c *Client) UpdateSrcIP(newSrcInfo net.IP) error {
 		return -1
 	}
 
-	ip := c.conn.RemoteAddr().String()
+	ip, _, err := net.SplitHostPort(c.conn.RemoteAddr().String())
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(ip)
 	if strings.Contains(ip, ":") {
 		l := &layers.IPv6{
 			DstIP: net.IP(ip),
