@@ -137,7 +137,7 @@ func Execute() {
 	}
 }
 
-func main() {
+func main(){
 	log.SetOutput(os.Stdout)
 	clientCmd.Flags().StringP("host", "i", "127.0.0.1:19", "Host, including port, default 127.0.0.1:19")
 	clientCmd.Flags().StringP("protocol", "p", "tcp", "Protocol, default udp. Only accepts tcp/udp")
