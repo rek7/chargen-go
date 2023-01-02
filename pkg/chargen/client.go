@@ -125,7 +125,6 @@ func (c *Client) UpdateSrcIP(newSrcInfo net.IP) error {
 		return err
 	}
 
-	fmt.Println(ip)
 	if strings.Contains(ip, ":") {
 		l := &layers.IPv6{
 			DstIP: net.IP(ip),
@@ -135,7 +134,7 @@ func (c *Client) UpdateSrcIP(newSrcInfo net.IP) error {
 		if newSrcInfo.String() == "<nil>" {
 			l.SrcIP = net.IP(a.IPV6)
 		}
-		log.Printf("spoofing ip6 as: %v %v\n", a.IPV6, newSrcInfo.To16().String())
+		log.Printf("spoofing ip6 as: %v %v\n", a.IPV6, l.SrcIP.String())
 
 		if index := getLayerIndex(int64(l.LayerType())); index != -1 {
 			c.layers[int(index)] = l
@@ -151,7 +150,7 @@ func (c *Client) UpdateSrcIP(newSrcInfo net.IP) error {
 		if newSrcInfo.String() == "<nil>" {
 			l.SrcIP = net.IP(a.IPV4)
 		}
-		log.Printf("spoofing ip4 as: %v %v\n", a.IPV4, newSrcInfo.String())
+		log.Printf("spoofing ip4 as: %v %v\n", a.IPV4, l.SrcIP.String())
 
 		if index := getLayerIndex(int64(l.LayerType())); index != -1 {
 			c.layers[int(index)] = l
